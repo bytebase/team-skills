@@ -1,6 +1,6 @@
 ---
 name: write-release-notes
-description: Generate professional Bytebase release notes by analyzing git commits, checking Terraform impact, searching Linear for customer feedback, and following established conventions. Use when preparing release notes for minor or patch versions.
+description: Generate professional Bytebase release notes by analyzing git commits, checking Terraform impact, searching Linear for customer feedback, and following established conventions. Creates Linear tracking issue and owner confirmation comments (with user approval before each write operation). Use when preparing release notes for minor or patch versions.
 ---
 
 # Release Notes Generator
@@ -19,8 +19,10 @@ This skill helps you create release notes for Bytebase releases by:
 7. Categorizing and prioritizing changes with ownership
 8. Writing concise, user-focused release notes (no implementation details or reasoning)
 9. Saving draft to `docs/release-notes/draft-X.Y.Z.md` for iteration
-10. Creating Linear issue with title `<version>-<date>_release_note`
-11. Adding confirmation comments with proper @mentions for each owner
+10. Creating Linear issue with title `<version>-<date>_release_note` **(with user confirmation)**
+11. Adding confirmation comments with proper @mentions for each owner **(with user confirmation)**
+
+**Note**: All Linear write operations (creating issues, posting comments) require explicit user confirmation before execution.
 
 ## Step-by-Step Process
 
@@ -452,33 +454,53 @@ Before finalizing:
 
 ### Phase 9: Linear Issue & Owner Confirmation
 
+**IMPORTANT**: Before each Linear write operation, you MUST confirm with the user. Never create issues or comments without explicit user approval.
+
 #### 9.1 Create Linear Issue for Release Notes
 
-After finalizing the release notes draft, create a Linear issue to track confirmations:
+After finalizing the release notes draft, prepare to create a Linear issue to track confirmations.
 
 **Issue Title Format**: `<version>-<date>_release_note`
 - Example: `3.13.1-20251230_release_note`
 
 **Issue Description**: Include the full release notes content and an owner confirmation table.
 
+**⚠️ CONFIRM WITH USER BEFORE CREATING:**
+
+Present the issue details and ask for confirmation:
+
 ```
-mcp__linear__create_issue with:
-- title: "3.13.1-20251230_release_note"
-- team: "Bytebase"
-- assignee: "Peter Zhu"
-- priority: 2  (High)
-- description: [Full release notes + Owner Confirmation Status table]
+I'm ready to create a Linear issue to track the release notes:
+
+**Title:** 3.13.1-20251230_release_note
+**Team:** Bytebase
+**Assignee:** Peter Zhu
+**Priority:** High
+
+**Description:**
+[Show the full release notes content that will be included]
+
+Should I create this Linear issue? (yes/no)
 ```
+
+Only proceed with `mcp__linear__create_issue` after user confirms.
 
 #### 9.2 Subscribe Stakeholders
 
-After creating the issue, subscribe Danny Xu and Tianzhou Chen by @mentioning them in a comment (this automatically subscribes them to the issue):
+After creating the issue, prepare to subscribe Danny Xu and Tianzhou Chen.
+
+**⚠️ CONFIRM WITH USER BEFORE COMMENTING:**
 
 ```
-mcp__linear__create_comment with:
-- issueId: "<issue-id>"
-- body: "[danny](https://linear.app/bytebase/profiles/danny) [tianzhou](https://linear.app/bytebase/profiles/tianzhou) FYI - subscribing you to this release note issue for visibility."
+I'll now add a comment to subscribe stakeholders (Danny and Tianzhou) to the issue.
+
+**Comment preview:**
+"[danny](https://linear.app/bytebase/profiles/danny) [tianzhou](https://linear.app/bytebase/profiles/tianzhou) FYI - subscribing you to this release note issue for visibility."
+
+Should I post this comment? (yes/no)
 ```
+
+Only proceed with `mcp__linear__create_comment` after user confirms.
 
 #### 9.3 Create Confirmation Comments with @mentions
 
@@ -502,8 +524,14 @@ mcp__linear__create_comment with:
 [displayName](https://linear.app/bytebase/profiles/displayName)
 ```
 
-**Example comment for Steven Li**:
-```markdown
+**⚠️ CONFIRM WITH USER BEFORE EACH OWNER COMMENT:**
+
+Present ALL owner comments at once for batch approval:
+
+```
+I'll now add confirmation comments for each owner. Here are the comments I'll post:
+
+**Comment 1 - For Steven Li (@steven):**
 [steven](https://linear.app/bytebase/profiles/steven) Please confirm the following items are accurate:
 
 **Enhancements:**
@@ -511,28 +539,43 @@ mcp__linear__create_comment with:
 
 **Bug Fixes:**
 - [ ] Fix rollout date filter not working
+
+---
+
+**Comment 2 - For Edward Lu (@ed):**
+[ed](https://linear.app/bytebase/profiles/ed) Please confirm the following items are accurate:
+
+**Bug Fixes:**
+- [ ] Fix domain change not triggering value update
+
+---
+
+[Continue for each owner...]
+
+Should I post these [N] owner confirmation comments? (yes/no/edit)
 ```
 
-Create one comment per owner using `mcp__linear__create_comment`:
-```
-mcp__linear__create_comment with:
-- issueId: "<issue-id>"
-- body: "[displayName](https://linear.app/bytebase/profiles/displayName) Please confirm..."
-```
+Only proceed with `mcp__linear__create_comment` for each owner after user confirms.
 
 #### 9.4 Add Final Confirmation Comments
 
-After adding owner-specific confirmation comments, add two final comments for overall release note approval:
+After adding owner-specific confirmation comments, prepare the final approval comments.
 
-**Comment 1 - For Adela Chen (adela):**
-```markdown
+**⚠️ CONFIRM WITH USER BEFORE POSTING:**
+
+```
+Finally, I'll add comments requesting overall release note approval:
+
+**Comment for Adela Chen (@adela):**
 [adela](https://linear.app/bytebase/profiles/adela) Please review and confirm the overall release notes are ready for publication.
+
+**Comment for Peter Zhu (@pz):**
+[pz](https://linear.app/bytebase/profiles/pz) Please review and confirm the overall release notes are ready for publication.
+
+Should I post these final approval comments? (yes/no)
 ```
 
-**Comment 2 - For Peter Zhu (pz):**
-```markdown
-[pz](https://linear.app/bytebase/profiles/pz) Please review and confirm the overall release notes are ready for publication.
-```
+Only proceed with `mcp__linear__create_comment` after user confirms.
 
 ### Phase 10: Write Draft to File
 
@@ -683,8 +726,9 @@ git log 3.12.1..origin/release/3.12.2 --format='%an' -- backend/api/ | sort | un
 1. **TodoWrite**: Create task list at start, update after each batch
 2. **Bash (parallel)**: Run multiple `git show --stat` commands simultaneously
 3. **WebFetch**: Fetch previous release notes to learn format
-4. **Linear MCP**: Search for customer-reported issues
-5. **Read if needed**: If commit message unclear, read actual code changes
+4. **Linear MCP (read)**: Search for customer-reported issues (no confirmation needed)
+5. **Linear MCP (write)**: **ALWAYS confirm with user** before creating issues or comments
+6. **Read if needed**: If commit message unclear, read actual code changes
 
 ## Success Criteria
 
@@ -703,5 +747,6 @@ A good release note:
 - Groups related changes effectively
 - Maintains professional, concise tone
 - **Draft saved to `docs/release-notes/draft-X.Y.Z.md`** for reference and iteration
-- **Linear issue created** with title `<version>-<date>_release_note`
-- **Confirmation comments added** with proper @mentions using profile URL format
+- **Linear issue created** with title `<version>-<date>_release_note` (after user confirmation)
+- **Confirmation comments added** with proper @mentions using profile URL format (after user confirmation)
+- **All Linear write operations confirmed by user** before execution
